@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  prometheus:
+    container_name: sbs_prometheus
+    image: prom/prometheus:v2.36.0
+    ports:
+      - 9090:9090
+    networks:
+      - mynetwork
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9090" ]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      
+  redis:
+    image: redis:latest
+    container_name: redis
+    command: redis-server --requirepass admin --appendonly yes
+    ports:
+      - 6379:6379
+    volumes:
+      - redis_data:/data
+    networks:
+      - mynetwork
+      
+  ms-cache:
+    image: finhat2/ms-cache:prometheus
+    depends_on:
+      - redis
+    ports:
+      - 8080:8080
+    environment:                   # Definindo variáveis de ambiente para configurar o Redis
+      SPRING_REDIS_HOST: redis    # Endereço do host Redis
+      SPRING_REDIS_PORT: 6379     # Porta do Redis
+      SPRING_REDIS_PASSWORD: admin  # Senha do Redis
+    networks:
+      - mynetwork
+      
+volumes:
+  redis_data:
+
+networks:
+  mynetwork:
+    driver: bridge

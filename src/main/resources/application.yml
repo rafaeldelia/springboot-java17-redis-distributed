@@ -1,0 +1,79 @@
+spring:
+  redis:
+    host: localhost
+    port: 6379
+    password: admin
+    ssl: false
+    #host: 
+    #port: 6380
+    #password: 
+    #ssl: true
+    timeout: 3000 # Defina um timeout, se necessário
+  main:
+    allow-bean-definition-overriding: true
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+    log-request-details: true
+  application:
+    name: ms-cache
+  banner:
+    location: classpath:bann.txt
+  datasource:
+    platform: postgresql
+    url: jdbc:postgresql://dbpgphoenixdev.postgres.database.azure.com:6432/consul?prepareThreshold=0
+    username: consul
+    password: consul01@
+    continue-on-error: true
+    hikari:
+      pool-name: HikariPool-PostgreSQL
+      leak-detection-threshold: 20000 # localizar o local exato do vazamento - o padrão é 0 (desabilitado)
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+    open-in-view: true
+    properties:
+      hibernate:
+        format_sql: true
+server:
+  compression:
+    enabled: true
+    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
+    min-response-size: 1024
+  port: 8080
+  servlet: 
+    context-path: /ms-cache
+management:
+  endpoint:
+    health:
+      group:
+        liveness:
+          include:
+            - db  # Se o db possuir o status DOWN, o liveness terá o status DOWN
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+logging:
+  level:
+    root: INFO
+    org:
+      springframework:
+        web: INFO
+        boot:
+          context: INFO
+        web.servlet.mvc.method.annotation.ServletRequestMethodHandlerAdapter: INFO
+        web.reactive.function.client.ExchangeFunctions: TRACE
+      hibernate:
+        SQL: DEBUG
+        engine:
+          transaction:
+            jta:
+              platform: WARN
+    com:
+      zaxxer:
+        hikari:
+          HikariConfig: DEBUG
+          HikariDataSource: TRACE

@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:      
+  redis:
+    image: redis:latest
+    container_name: redis
+    command: redis-server --requirepass admin --appendonly yes
+    ports:
+      - 6379:6379
+    volumes:
+      - redis_data:/data
+    networks:
+      - mynetwork
+      
+  ms-cache:
+    image: finhat2/ms-cache:07
+    depends_on:
+      - redis
+    ports:
+      - 8080:8080
+    environment:                   # Definindo variáveis de ambiente para configurar o Redis
+      SPRING_REDIS_HOST: redis    # Endereço do host Redis
+      SPRING_REDIS_PORT: 6379     # Porta do Redis
+      SPRING_REDIS_PASSWORD: admin  # Senha do Redis
+    networks:
+      - mynetwork
+      
+volumes:
+  redis_data:
+
+networks:
+  mynetwork:
+    driver: bridge
